@@ -1,0 +1,13 @@
+[project]
+name = "asr-service"
+version = "0.1.0"
+description = "西交大语音识别异步化服务系统"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "celery[redis]>=5.5.3",
+    "dotenv>=0.9.9",
+    "fastapi>=0.119.0",
+    "requests>=2.32.5",
+    "uvicorn>=0.37.0",
+]

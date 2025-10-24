@@ -1,0 +1,36 @@
+services:
+  redis:
+    container_name: asr-redis
+    image: swr.cn-east-3.myhuaweicloud.com/digconn-platform-dev/redis:8.0.2
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - ./redis-data:/data
+    command: [
+      "redis-server",
+      "--appendonly", "yes",
+      "--requirepass", "${REDIS_PASSWORD}"
+    ]
+
+  fastapi:
+    image: swr.cn-east-3.myhuaweicloud.com/digconn-platform-dev/asr-service:v1.0.0
+    container_name: asr-api
+    command: uvicorn app:app --host 0.0.0.0 --port ${APP_PORT}
+    depends_on:
+      - redis
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    restart: always
+    volumes:
+      - ./.env:/asr_service/app/.env
+
+  worker:
+    image: swr.cn-east-3.myhuaweicloud.com/digconn-platform-dev/asr-service:v1.0.0
+    container_name: asr-celery-worker
+    command: celery -A tasks.celery_app worker --loglevel=info --pool=threads --concurrency=2
+    depends_on:
+      - redis
+    restart: always
+    volumes:
+      - ./.env:/asr_service/app/.env
